@@ -19,7 +19,7 @@ windows = { version = "0.58", features = [
     "Win32_Storage_FileSystem",
     "Win32_Security",
     "Win32_Graphics_Dwm",
-    "Win32_Graphics_Gdi",          # ← required for WNDCLASSW / RegisterClassW
+    "Win32_Graphics_Gdi",
 ] }
 webview2-com = "0.33"
 nucleo-matcher = "0.3"
