@@ -508,7 +508,7 @@ fn main() {
 
     let viewport = egui::ViewportBuilder::default()
         .with_title("Palette")
-        .with_decorated(false)
+        .with_decorations(false)
         .with_always_on_top()
         .with_transparent(false)
         .with_visible(false)
