@@ -1,0 +1,35 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build
+        run: cargo build --release --target x86_64-pc-windows-msvc
+
+      - name: Package portable zip
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force out | Out-Null
+          Copy-Item target/x86_64-pc-windows-msvc/release/palette.exe out/
+          Copy-Item README.md out/README.txt
+          Compress-Archive -Path out/* -DestinationPath Palette-x64-portable.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Palette-x64-portable
+          path: Palette-x64-portable.zip
