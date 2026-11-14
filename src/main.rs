@@ -203,10 +203,8 @@ impl App {
     fn run_action(&mut self, ctx: &egui::Context, a: sources::Action) {
         match a {
             sources::Action::Open(path) => { win::shell_open(&path); }
-            sources::Action::Url(u) => { win::shell_open(&u); }
             sources::Action::MsSettings(uri) => { win::shell_open(&uri); }
             sources::Action::Run { exe, args, cwd } => { win::spawn(&exe, &args, &cwd); }
-            sources::Action::Web(q) => { self.web.navigate(web::resolve(&q)); }
             sources::Action::Internal(name) => match name {
                 "settings" => { self.open_settings(ctx); return; }
                 "quit" => {
