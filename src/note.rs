@@ -70,9 +70,8 @@ pub fn editor(ui: &mut egui::Ui, state: &mut NoteState) -> bool {
         close = true;
     }
 
-    let mut layouter = |ui: &egui::Ui, s: &dyn egui::TextBuffer, _wrap: f32| {
-        let text = s.as_str().to_string();
-        let job = markdown_job(ui, &text);
+    let mut layouter = |ui: &egui::Ui, s: &str, _wrap: f32| {
+        let job = markdown_job(ui, s);
         ui.fonts(|f| f.layout_job(job))
     };
 
