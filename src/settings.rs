@@ -4,16 +4,31 @@ use eframe::egui;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Section {
-    General, Appearance, Bangs, Commands, QuickFolders,
-    FileSearch, Bookmarks, Notes, Blocklist, About,
+    General,
+    Appearance,
+    Bangs,
+    Commands,
+    QuickFolders,
+    FileSearch,
+    Bookmarks,
+    Notes,
+    Blocklist,
+    About,
 }
 
 impl Section {
     pub fn all() -> &'static [Section] {
         &[
-            Section::General, Section::Appearance, Section::Bangs,
-            Section::Commands, Section::QuickFolders, Section::FileSearch,
-            Section::Bookmarks, Section::Notes, Section::Blocklist, Section::About,
+            Section::General,
+            Section::Appearance,
+            Section::Bangs,
+            Section::Commands,
+            Section::QuickFolders,
+            Section::FileSearch,
+            Section::Bookmarks,
+            Section::Notes,
+            Section::Blocklist,
+            Section::About,
         ]
     }
     pub fn label(self) -> &'static str {
@@ -33,10 +48,20 @@ impl Section {
 }
 
 const BUILTIN_COMMANDS: &[&str] = &[
-    "Settings", "Quit Palette", "Reload index",
-    "Task Manager", "Control Panel", "Terminal", "PowerShell",
-    "Command Prompt", "Run dialog",
-    "Lock", "Sleep", "Restart", "Shutdown", "Sign out",
+    "Settings",
+    "Quit Palette",
+    "Reload index",
+    "Task Manager",
+    "Control Panel",
+    "Terminal",
+    "PowerShell",
+    "Command Prompt",
+    "Run dialog",
+    "Lock",
+    "Sleep",
+    "Restart",
+    "Shutdown",
+    "Sign out",
 ];
 
 #[derive(Default)]
@@ -98,20 +123,20 @@ pub fn show(ui: &mut egui::Ui, state: &mut SettingsState, cfg: &mut Config) -> O
 
     egui::CentralPanel::default().show_inside(ui, |ui| {
         ui.add_space(8.0);
-        egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
-            match state.section.unwrap_or(Section::General) {
-                Section::General      => general(ui, cfg, &mut out),
-                Section::Appearance   => appearance(ui, cfg, &mut out),
-                Section::Bangs        => bangs(ui, cfg, state, &mut out),
-                Section::Commands     => commands(ui, cfg, state, &mut out),
+        egui::ScrollArea::vertical()
+            .auto_shrink([false, false])
+            .show(ui, |ui| match state.section.unwrap_or(Section::General) {
+                Section::General => general(ui, cfg, &mut out),
+                Section::Appearance => appearance(ui, cfg, &mut out),
+                Section::Bangs => bangs(ui, cfg, state, &mut out),
+                Section::Commands => commands(ui, cfg, state, &mut out),
                 Section::QuickFolders => quick_folders(ui, cfg, state, &mut out),
-                Section::FileSearch   => file_search(ui, cfg, state, &mut out),
-                Section::Bookmarks    => bookmarks(ui, cfg, state, &mut out),
-                Section::Notes        => notes(ui, cfg, &mut out),
-                Section::Blocklist    => blocklist(ui, cfg, state, &mut out),
-                Section::About        => about(ui, &mut out),
-            }
-        });
+                Section::FileSearch => file_search(ui, cfg, state, &mut out),
+                Section::Bookmarks => bookmarks(ui, cfg, state, &mut out),
+                Section::Notes => notes(ui, cfg, &mut out),
+                Section::Blocklist => blocklist(ui, cfg, state, &mut out),
+                Section::About => about(ui, &mut out),
+            });
     });
 
     out
@@ -138,7 +163,8 @@ fn general(ui: &mut egui::Ui, cfg: &mut Config, out: &mut Outcome) {
     if crate::hotkey::did_fallback() {
         ui.colored_label(
             egui::Color32::from_rgb(220, 180, 60),
-            "⚠ Ctrl+Space could not be registered (likely an IME conflict). Using Ctrl+Shift+Space instead.",
+            "⚠ Ctrl+Space could not be registered (likely an IME conflict). \
+             Using Ctrl+Shift+Space instead.",
         );
         ui.add_space(6.0);
     }
@@ -157,11 +183,30 @@ fn general(ui: &mut egui::Ui, cfg: &mut Config, out: &mut Outcome) {
     }
     ui.add_space(10.0);
 
-    if ui.checkbox(&mut cfg.open_at_cursor, "Open at mouse cursor").changed() { commit(cfg, out); }
-    if ui.checkbox(&mut cfg.compact, "Compact mode").changed() { commit(cfg, out); }
-    if ui.checkbox(&mut cfg.show_suggestions_when_empty, "Show suggestions when empty").changed() { commit(cfg, out); }
-    if ui.checkbox(&mut cfg.free_browser_memory, "Free browser memory when closed").changed() { commit(cfg, out); }
-    if ui.checkbox(&mut cfg.low_memory_mode, "Low memory mode (disables GPU)").changed() { commit(cfg, out); }
+    if ui.checkbox(&mut cfg.open_at_cursor, "Open at mouse cursor").changed() {
+        commit(cfg, out);
+    }
+    if ui.checkbox(&mut cfg.compact, "Compact mode").changed() {
+        commit(cfg, out);
+    }
+    if ui
+        .checkbox(&mut cfg.show_suggestions_when_empty, "Show suggestions when empty")
+        .changed()
+    {
+        commit(cfg, out);
+    }
+    if ui
+        .checkbox(&mut cfg.free_browser_memory, "Free browser memory when closed")
+        .changed()
+    {
+        commit(cfg, out);
+    }
+    if ui
+        .checkbox(&mut cfg.low_memory_mode, "Low memory mode (disables GPU)")
+        .changed()
+    {
+        commit(cfg, out);
+    }
 
     ui.add_space(10.0);
     ui.label("Max results per category");
@@ -175,7 +220,11 @@ fn appearance(ui: &mut egui::Ui, cfg: &mut Config, out: &mut Outcome) {
 
     ui.label("Theme");
     ui.horizontal(|ui| {
-        for (t, l) in [(Theme::Light, "Light"), (Theme::Dark, "Dark"), (Theme::System, "System")] {
+        for (t, l) in [
+            (Theme::Light, "Light"),
+            (Theme::Dark, "Dark"),
+            (Theme::System, "System"),
+        ] {
             if ui.radio(cfg.theme == t, l).clicked() {
                 cfg.theme = t;
                 commit(cfg, out);
@@ -187,7 +236,13 @@ fn appearance(ui: &mut egui::Ui, cfg: &mut Config, out: &mut Outcome) {
     ui.label("Font scale");
     ui.horizontal(|ui| {
         for s in [0.9_f32, 1.0, 1.1, 1.25] {
-            if ui.radio((cfg.font_scale - s).abs() < 0.01, format!("{}%", (s * 100.0) as i32)).clicked() {
+            if ui
+                .radio(
+                    (cfg.font_scale - s).abs() < 0.01,
+                    format!("{}%", (s * 100.0) as i32),
+                )
+                .clicked()
+            {
                 cfg.font_scale = s;
                 commit(cfg, out);
             }
@@ -201,26 +256,56 @@ fn appearance(ui: &mut egui::Ui, cfg: &mut Config, out: &mut Outcome) {
 }
 
 fn bangs(ui: &mut egui::Ui, cfg: &mut Config, state: &mut SettingsState, out: &mut Outcome) {
-    heading(ui, "Bangs",
-        "Trigger must be a bare word (no !, no spaces). Reserved: w, wb, note, settings.");
+    heading(
+        ui,
+        "Bangs",
+        "Trigger must be a bare word (no !, no spaces). Reserved: w, wb, note, settings.",
+    );
 
     let mut remove: Option<usize> = None;
+    let mut changed = false;
     for (i, b) in cfg.bangs.iter_mut().enumerate() {
         ui.horizontal(|ui| {
-            if ui.add(egui::TextEdit::singleline(&mut b.trigger).desired_width(60.0)).changed() { commit(cfg, out); }
-            if ui.add(egui::TextEdit::singleline(&mut b.name).desired_width(110.0)).changed() { commit(cfg, out); }
-            if ui.add(egui::TextEdit::singleline(&mut b.url).desired_width(360.0)).changed() { commit(cfg, out); }
-            if ui.button("×").clicked() { remove = Some(i); }
+            changed |= ui
+                .add(egui::TextEdit::singleline(&mut b.trigger).desired_width(60.0))
+                .changed();
+            changed |= ui
+                .add(egui::TextEdit::singleline(&mut b.name).desired_width(110.0))
+                .changed();
+            changed |= ui
+                .add(egui::TextEdit::singleline(&mut b.url).desired_width(360.0))
+                .changed();
+            if ui.button("×").clicked() {
+                remove = Some(i);
+            }
         });
     }
-    if let Some(i) = remove { cfg.bangs.remove(i); commit(cfg, out); }
+    if changed {
+        commit(cfg, out);
+    }
+    if let Some(i) = remove {
+        cfg.bangs.remove(i);
+        commit(cfg, out);
+    }
 
     ui.add_space(8.0);
     ui.horizontal(|ui| {
         ui.label("Add");
-        ui.add(egui::TextEdit::singleline(&mut state.new_bang_trigger).hint_text("trigger").desired_width(60.0));
-        ui.add(egui::TextEdit::singleline(&mut state.new_bang_name).hint_text("Name").desired_width(110.0));
-        ui.add(egui::TextEdit::singleline(&mut state.new_bang_url).hint_text("https://…{query}").desired_width(360.0));
+        ui.add(
+            egui::TextEdit::singleline(&mut state.new_bang_trigger)
+                .hint_text("trigger")
+                .desired_width(60.0),
+        );
+        ui.add(
+            egui::TextEdit::singleline(&mut state.new_bang_name)
+                .hint_text("Name")
+                .desired_width(110.0),
+        );
+        ui.add(
+            egui::TextEdit::singleline(&mut state.new_bang_url)
+                .hint_text("https://…{query}")
+                .desired_width(360.0),
+        );
 
         let t = state.new_bang_trigger.trim();
         let valid = !t.is_empty()
@@ -257,7 +342,9 @@ fn commands(ui: &mut egui::Ui, cfg: &mut Config, state: &mut SettingsState, out:
         let mut on = !cfg.disabled_builtins.iter().any(|d| d == name);
         if ui.checkbox(&mut on, *name).changed() {
             cfg.disabled_builtins.retain(|d| d != name);
-            if !on { cfg.disabled_builtins.push((*name).to_string()); }
+            if !on {
+                cfg.disabled_builtins.push((*name).to_string());
+            }
             commit(cfg, out);
         }
     }
@@ -265,22 +352,58 @@ fn commands(ui: &mut egui::Ui, cfg: &mut Config, state: &mut SettingsState, out:
     ui.add_space(12.0);
     ui.label("User commands");
     let mut remove: Option<usize> = None;
+    let mut changed = false;
     for (i, c) in cfg.commands.iter_mut().enumerate() {
         ui.horizontal(|ui| {
-            if ui.add(egui::TextEdit::singleline(&mut c.name).desired_width(140.0)).changed() { commit(cfg, out); }
-            if ui.add(egui::TextEdit::singleline(&mut c.exe).hint_text("exe").desired_width(220.0)).changed() { commit(cfg, out); }
-            if ui.add(egui::TextEdit::singleline(&mut c.args).hint_text("args").desired_width(160.0)).changed() { commit(cfg, out); }
-            if ui.button("×").clicked() { remove = Some(i); }
+            changed |= ui
+                .add(egui::TextEdit::singleline(&mut c.name).desired_width(140.0))
+                .changed();
+            changed |= ui
+                .add(
+                    egui::TextEdit::singleline(&mut c.exe)
+                        .hint_text("exe")
+                        .desired_width(220.0),
+                )
+                .changed();
+            changed |= ui
+                .add(
+                    egui::TextEdit::singleline(&mut c.args)
+                        .hint_text("args")
+                        .desired_width(160.0),
+                )
+                .changed();
+            if ui.button("×").clicked() {
+                remove = Some(i);
+            }
         });
     }
-    if let Some(i) = remove { cfg.commands.remove(i); commit(cfg, out); }
+    if changed {
+        commit(cfg, out);
+    }
+    if let Some(i) = remove {
+        cfg.commands.remove(i);
+        commit(cfg, out);
+    }
 
     ui.add_space(8.0);
     ui.horizontal(|ui| {
-        ui.add(egui::TextEdit::singleline(&mut state.new_cmd_name).hint_text("Name").desired_width(140.0));
-        ui.add(egui::TextEdit::singleline(&mut state.new_cmd_exe).hint_text("C:\\path\\to.exe").desired_width(220.0));
-        ui.add(egui::TextEdit::singleline(&mut state.new_cmd_args).hint_text("args").desired_width(160.0));
-        let valid = !state.new_cmd_name.trim().is_empty() && !state.new_cmd_exe.trim().is_empty();
+        ui.add(
+            egui::TextEdit::singleline(&mut state.new_cmd_name)
+                .hint_text("Name")
+                .desired_width(140.0),
+        );
+        ui.add(
+            egui::TextEdit::singleline(&mut state.new_cmd_exe)
+                .hint_text("C:\\path\\to.exe")
+                .desired_width(220.0),
+        );
+        ui.add(
+            egui::TextEdit::singleline(&mut state.new_cmd_args)
+                .hint_text("args")
+                .desired_width(160.0),
+        );
+        let valid = !state.new_cmd_name.trim().is_empty()
+            && !state.new_cmd_exe.trim().is_empty();
         if ui.add_enabled(valid, egui::Button::new("Add")).clicked() {
             cfg.commands.push(UserCommand {
                 name: state.new_cmd_name.trim().to_string(),
@@ -298,54 +421,107 @@ fn commands(ui: &mut egui::Ui, cfg: &mut Config, state: &mut SettingsState, out:
     });
 }
 
-fn quick_folders(ui: &mut egui::Ui, cfg: &mut Config, state: &mut SettingsState, out: &mut Outcome) {
+fn quick_folders(
+    ui: &mut egui::Ui,
+    cfg: &mut Config,
+    state: &mut SettingsState,
+    out: &mut Outcome,
+) {
     heading(ui, "Quick folders", "Shown as their own category.");
 
     let mut remove: Option<usize> = None;
+    let mut changed = false;
     for (i, p) in cfg.quick_folders.iter_mut().enumerate() {
         ui.horizontal(|ui| {
             let mut s = p.to_string_lossy().into_owned();
-            if ui.add(egui::TextEdit::singleline(&mut s).desired_width(440.0)).changed() {
+            if ui
+                .add(egui::TextEdit::singleline(&mut s).desired_width(440.0))
+                .changed()
+            {
                 *p = std::path::PathBuf::from(s);
-                commit(cfg, out);
+                changed = true;
             }
-            if ui.button("×").clicked() { remove = Some(i); }
+            if ui.button("×").clicked() {
+                remove = Some(i);
+            }
         });
     }
-    if let Some(i) = remove { cfg.quick_folders.remove(i); commit(cfg, out); }
+    if changed {
+        commit(cfg, out);
+    }
+    if let Some(i) = remove {
+        cfg.quick_folders.remove(i);
+        commit(cfg, out);
+    }
 
     ui.add_space(8.0);
     ui.horizontal(|ui| {
-        ui.add(egui::TextEdit::singleline(&mut state.new_folder).hint_text("C:\\Folder").desired_width(440.0));
-        if ui.add_enabled(!state.new_folder.trim().is_empty(), egui::Button::new("Add")).clicked() {
-            cfg.quick_folders.push(std::path::PathBuf::from(state.new_folder.trim()));
+        ui.add(
+            egui::TextEdit::singleline(&mut state.new_folder)
+                .hint_text("C:\\Folder")
+                .desired_width(440.0),
+        );
+        if ui
+            .add_enabled(
+                !state.new_folder.trim().is_empty(),
+                egui::Button::new("Add"),
+            )
+            .clicked()
+        {
+            cfg.quick_folders
+                .push(std::path::PathBuf::from(state.new_folder.trim()));
             state.new_folder.clear();
             commit(cfg, out);
         }
     });
 }
 
-fn file_search(ui: &mut egui::Ui, cfg: &mut Config, state: &mut SettingsState, out: &mut Outcome) {
+fn file_search(
+    ui: &mut egui::Ui,
+    cfg: &mut Config,
+    state: &mut SettingsState,
+    out: &mut Outcome,
+) {
     heading(ui, "File search", "Only these roots are indexed.");
 
     ui.label("Roots");
     let mut remove: Option<usize> = None;
+    let mut changed = false;
     for (i, p) in cfg.roots.iter_mut().enumerate() {
         ui.horizontal(|ui| {
             let mut s = p.to_string_lossy().into_owned();
-            if ui.add(egui::TextEdit::singleline(&mut s).desired_width(420.0)).changed() {
+            if ui
+                .add(egui::TextEdit::singleline(&mut s).desired_width(420.0))
+                .changed()
+            {
                 *p = std::path::PathBuf::from(s);
-                commit(cfg, out);
+                changed = true;
             }
-            if ui.button("×").clicked() { remove = Some(i); }
+            if ui.button("×").clicked() {
+                remove = Some(i);
+            }
         });
     }
-    if let Some(i) = remove { cfg.roots.remove(i); commit(cfg, out); }
+    if changed {
+        commit(cfg, out);
+    }
+    if let Some(i) = remove {
+        cfg.roots.remove(i);
+        commit(cfg, out);
+    }
 
     ui.horizontal(|ui| {
-        ui.add(egui::TextEdit::singleline(&mut state.new_root).hint_text("C:\\Folder").desired_width(420.0));
-        if ui.add_enabled(!state.new_root.trim().is_empty(), egui::Button::new("Add root")).clicked() {
-            cfg.roots.push(std::path::PathBuf::from(state.new_root.trim()));
+        ui.add(
+            egui::TextEdit::singleline(&mut state.new_root)
+                .hint_text("C:\\Folder")
+                .desired_width(420.0),
+        );
+        if ui
+            .add_enabled(!state.new_root.trim().is_empty(), egui::Button::new("Add root"))
+            .clicked()
+        {
+            cfg.roots
+                .push(std::path::PathBuf::from(state.new_root.trim()));
             state.new_root.clear();
             commit(cfg, out);
         }
@@ -354,17 +530,38 @@ fn file_search(ui: &mut egui::Ui, cfg: &mut Config, state: &mut SettingsState, o
     ui.add_space(12.0);
     ui.label("Excludes (matched by folder name)");
     let mut remove: Option<usize> = None;
+    let mut changed = false;
     for (i, e) in cfg.excludes.iter_mut().enumerate() {
         ui.horizontal(|ui| {
-            if ui.add(egui::TextEdit::singleline(e).desired_width(300.0)).changed() { commit(cfg, out); }
-            if ui.button("×").clicked() { remove = Some(i); }
+            changed |= ui
+                .add(egui::TextEdit::singleline(e).desired_width(300.0))
+                .changed();
+            if ui.button("×").clicked() {
+                remove = Some(i);
+            }
         });
     }
-    if let Some(i) = remove { cfg.excludes.remove(i); commit(cfg, out); }
+    if changed {
+        commit(cfg, out);
+    }
+    if let Some(i) = remove {
+        cfg.excludes.remove(i);
+        commit(cfg, out);
+    }
 
     ui.horizontal(|ui| {
-        ui.add(egui::TextEdit::singleline(&mut state.new_exclude).hint_text("node_modules").desired_width(300.0));
-        if ui.add_enabled(!state.new_exclude.trim().is_empty(), egui::Button::new("Add exclude")).clicked() {
+        ui.add(
+            egui::TextEdit::singleline(&mut state.new_exclude)
+                .hint_text("node_modules")
+                .desired_width(300.0),
+        );
+        if ui
+            .add_enabled(
+                !state.new_exclude.trim().is_empty(),
+                egui::Button::new("Add exclude"),
+            )
+            .clicked()
+        {
             cfg.excludes.push(state.new_exclude.trim().to_string());
             state.new_exclude.clear();
             commit(cfg, out);
@@ -378,24 +575,55 @@ fn file_search(ui: &mut egui::Ui, cfg: &mut Config, state: &mut SettingsState, o
     }
 }
 
-fn bookmarks(ui: &mut egui::Ui, cfg: &mut Config, state: &mut SettingsState, out: &mut Outcome) {
-    heading(ui, "Bookmarks", "Shown as suggestions when w  is typed with no query.");
+fn bookmarks(
+    ui: &mut egui::Ui,
+    cfg: &mut Config,
+    state: &mut SettingsState,
+    out: &mut Outcome,
+) {
+    heading(
+        ui,
+        "Bookmarks",
+        "Shown as suggestions when w  is typed with no query.",
+    );
 
     let mut remove: Option<usize> = None;
+    let mut changed = false;
     for (i, b) in cfg.bookmarks.iter_mut().enumerate() {
         ui.horizontal(|ui| {
-            if ui.add(egui::TextEdit::singleline(&mut b.title).desired_width(180.0)).changed() { commit(cfg, out); }
-            if ui.add(egui::TextEdit::singleline(&mut b.url).desired_width(340.0)).changed() { commit(cfg, out); }
-            if ui.button("×").clicked() { remove = Some(i); }
+            changed |= ui
+                .add(egui::TextEdit::singleline(&mut b.title).desired_width(180.0))
+                .changed();
+            changed |= ui
+                .add(egui::TextEdit::singleline(&mut b.url).desired_width(340.0))
+                .changed();
+            if ui.button("×").clicked() {
+                remove = Some(i);
+            }
         });
     }
-    if let Some(i) = remove { cfg.bookmarks.remove(i); commit(cfg, out); }
+    if changed {
+        commit(cfg, out);
+    }
+    if let Some(i) = remove {
+        cfg.bookmarks.remove(i);
+        commit(cfg, out);
+    }
 
     ui.add_space(8.0);
     ui.horizontal(|ui| {
-        ui.add(egui::TextEdit::singleline(&mut state.new_bookmark_title).hint_text("Title").desired_width(180.0));
-        ui.add(egui::TextEdit::singleline(&mut state.new_bookmark_url).hint_text("https://…").desired_width(340.0));
-        let valid = !state.new_bookmark_title.trim().is_empty() && !state.new_bookmark_url.trim().is_empty();
+        ui.add(
+            egui::TextEdit::singleline(&mut state.new_bookmark_title)
+                .hint_text("Title")
+                .desired_width(180.0),
+        );
+        ui.add(
+            egui::TextEdit::singleline(&mut state.new_bookmark_url)
+                .hint_text("https://…")
+                .desired_width(340.0),
+        );
+        let valid = !state.new_bookmark_title.trim().is_empty()
+            && !state.new_bookmark_url.trim().is_empty();
         if ui.add_enabled(valid, egui::Button::new("Add")).clicked() {
             cfg.bookmarks.push(Bookmark {
                 title: state.new_bookmark_title.trim().to_string(),
@@ -414,7 +642,10 @@ fn notes(ui: &mut egui::Ui, cfg: &mut Config, out: &mut Outcome) {
     ui.label("Notes folder");
     ui.horizontal(|ui| {
         let mut s = cfg.notes_dir.to_string_lossy().into_owned();
-        if ui.add(egui::TextEdit::singleline(&mut s).desired_width(420.0)).changed() {
+        if ui
+            .add(egui::TextEdit::singleline(&mut s).desired_width(420.0))
+            .changed()
+        {
             cfg.notes_dir = std::path::PathBuf::from(s);
             commit(cfg, out);
         }
@@ -425,23 +656,52 @@ fn notes(ui: &mut egui::Ui, cfg: &mut Config, out: &mut Outcome) {
     });
 }
 
-fn blocklist(ui: &mut egui::Ui, cfg: &mut Config, state: &mut SettingsState, out: &mut Outcome) {
-    heading(ui, "Blocklist",
-        "Exact titles, exact paths, or substrings. Hidden items are excluded from every source.");
+fn blocklist(
+    ui: &mut egui::Ui,
+    cfg: &mut Config,
+    state: &mut SettingsState,
+    out: &mut Outcome,
+) {
+    heading(
+        ui,
+        "Blocklist",
+        "Exact titles, exact paths, or substrings. Hidden items are excluded from every source.",
+    );
 
     let mut remove: Option<usize> = None;
+    let mut changed = false;
     for (i, e) in cfg.blocklist.iter_mut().enumerate() {
         ui.horizontal(|ui| {
-            if ui.add(egui::TextEdit::singleline(e).desired_width(420.0)).changed() { commit(cfg, out); }
-            if ui.button("×").clicked() { remove = Some(i); }
+            changed |= ui
+                .add(egui::TextEdit::singleline(e).desired_width(420.0))
+                .changed();
+            if ui.button("×").clicked() {
+                remove = Some(i);
+            }
         });
     }
-    if let Some(i) = remove { cfg.blocklist.remove(i); commit(cfg, out); }
+    if changed {
+        commit(cfg, out);
+    }
+    if let Some(i) = remove {
+        cfg.blocklist.remove(i);
+        commit(cfg, out);
+    }
 
     ui.add_space(8.0);
     ui.horizontal(|ui| {
-        ui.add(egui::TextEdit::singleline(&mut state.new_blocklist).hint_text("Entry").desired_width(420.0));
-        if ui.add_enabled(!state.new_blocklist.trim().is_empty(), egui::Button::new("Add")).clicked() {
+        ui.add(
+            egui::TextEdit::singleline(&mut state.new_blocklist)
+                .hint_text("Entry")
+                .desired_width(420.0),
+        );
+        if ui
+            .add_enabled(
+                !state.new_blocklist.trim().is_empty(),
+                egui::Button::new("Add"),
+            )
+            .clicked()
+        {
             cfg.blocklist.push(state.new_blocklist.trim().to_string());
             state.new_blocklist.clear();
             commit(cfg, out);
@@ -453,8 +713,14 @@ fn about(ui: &mut egui::Ui, out: &mut Outcome) {
     heading(ui, "About Palette", "");
     ui.label(format!("Version {}", env!("CARGO_PKG_VERSION")));
     ui.label(format!("Config: {}", Config::path().display()));
-    ui.label(format!("Log:    {}", crate::config::localappdata().join("log.txt").display()));
-    ui.label(format!("WebView2 data: {}", crate::config::localappdata().join("WebView2").display()));
+    ui.label(format!(
+        "Log:    {}",
+        crate::config::localappdata().join("log.txt").display()
+    ));
+    ui.label(format!(
+        "WebView2 data: {}",
+        crate::config::localappdata().join("WebView2").display()
+    ));
     ui.add_space(12.0);
 
     ui.horizontal(|ui| {
