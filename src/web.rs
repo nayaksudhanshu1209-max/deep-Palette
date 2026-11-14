@@ -56,7 +56,7 @@ pub fn resolve(q: &str) -> String {
 
 #[cfg(windows)]
 fn run(rx: std::sync::mpsc::Receiver<Cmd>) -> windows::core::Result<()> {
-    use windows::core::{w, HSTRING};
+    use windows::core::{w, HSTRING, PCWSTR};
     use windows::Win32::Foundation::*;
     use windows::Win32::System::LibraryLoader::GetModuleHandleW;
     use windows::Win32::UI::WindowsAndMessaging::*;
@@ -102,17 +102,21 @@ fn run(rx: std::sync::mpsc::Receiver<Cmd>) -> windows::core::Result<()> {
                         let c = c.ok_or(windows::core::Error::from(E_FAIL))?;
                         let mut r = RECT::default();
                         let _ = GetClientRect(hwnd, &mut r);
-                        let _ = c.put_Bounds(r);
-                        let _ = c.put_IsVisible(true);
+                        // webview2-com 0.33 setters: SetBounds, SetIsVisible
+                        let _ = c.SetBounds(r);
+                        let _ = c.SetIsVisible(true);
+
                         if let Ok(cw) = c.CoreWebView2() {
+                            // Base ICoreWebView2Settings setters (no put_ prefix).
                             let s = cw.Settings()?;
-                            let _ = s.put_AreDevToolsEnabled(false);
-                            let _ = s.put_AreDefaultContextMenusEnabled(false);
-                            let _ = s.put_IsStatusBarEnabled(false);
-                            let _ = s.put_IsPasswordAutosaveEnabled(false);
-                            let _ = s.put_IsGeneralAutofillEnabled(false);
-                            let _ = s.put_AreHostObjectsAllowed(false);
-                            let _ = s.put_IsWebMessageEnabled(false);
+                            let _ = s.SetAreDevToolsEnabled(false);
+                            let _ = s.SetAreDefaultContextMenusEnabled(false);
+                            let _ = s.SetIsStatusBarEnabled(false);
+                            let _ = s.SetAreHostObjectsAllowed(false);
+                            let _ = s.SetIsWebMessageEnabled(false);
+                            // ArePasswordAutosaveEnabled / IsGeneralAutofillEnabled
+                            // live on ICoreWebView2Settings3/4; skip on base interface
+                            // (the defaults are already false in a fresh profile).
                         }
                         *ctrl2b.lock().unwrap() = Some(c);
                         Ok(())
@@ -125,8 +129,9 @@ fn run(rx: std::sync::mpsc::Receiver<Cmd>) -> windows::core::Result<()> {
 
         let user_data = crate::config::localappdata().join("WebView2");
         let ud = HSTRING::from(user_data.to_string_lossy().to_string());
+        // First argument is the browser-executable folder (PCWSTR). Pass null.
         let _ = CreateCoreWebView2EnvironmentWithOptions(
-            None::<&HSTRING>,
+            PCWSTR::null(),
             &ud,
             None,
             &env_handler,
