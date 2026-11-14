@@ -109,22 +109,15 @@ fn run(rx: std::sync::mpsc::Receiver<Cmd>) -> windows::core::Result<()> {
                         let c = c.ok_or(windows::core::Error::from(E_FAIL))?;
                         let mut r = RECT::default();
                         let _ = GetClientRect(hwnd, &mut r);
-
-                        // Use the inherent SetBounds and SetIsVisible setters.
                         let _ = c.SetBounds(r);
                         let _ = c.SetIsVisible(true);
-
                         if let Ok(cw) = c.CoreWebView2() {
                             let s = cw.Settings()?;
-                            // Use the inherent Set... setters for settings.
                             let _ = s.SetAreDevToolsEnabled(false);
                             let _ = s.SetAreDefaultContextMenusEnabled(false);
                             let _ = s.SetIsStatusBarEnabled(false);
                             let _ = s.SetAreHostObjectsAllowed(false);
                             let _ = s.SetIsWebMessageEnabled(false);
-                            // IsPasswordAutosaveEnabled / IsGeneralAutofillEnabled
-                            // live on ICoreWebView2Settings3/4. A fresh user-data
-                            // folder already defaults both to false.
                         }
                         *ctrl2b.lock().unwrap() = Some(c);
                         Ok(())
@@ -167,7 +160,7 @@ fn run(rx: std::sync::mpsc::Receiver<Cmd>) -> windows::core::Result<()> {
                 if msg.message == WM_QUIT {
                     break;
                 }
-                TranslateMessage(&msg);
+                let _ = TranslateMessage(&msg);
                 DispatchMessageW(&msg);
             } else {
                 std::thread::sleep(std::time::Duration::from_millis(16));
