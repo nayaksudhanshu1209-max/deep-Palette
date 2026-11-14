@@ -75,10 +75,10 @@ fn is_browser_focused() -> bool {
             return false;
         }
         let root = GetAncestor(fg, GA_ROOT);
-        let b = crate::web::BROWSER_HWND.load(Ordering::SeqCst) as *mut _;
-        if b.is_null() {
+        let raw = crate::web::BROWSER_HWND.load(Ordering::SeqCst);
+        if raw == 0 {
             return false;
         }
-        root.0 as isize == b as isize
+        root.0 as isize == raw
     }
 }
