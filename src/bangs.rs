@@ -12,7 +12,6 @@ pub enum ChipKind {
 pub struct ChipInfo {
     pub kind: ChipKind,
     pub label: String,
-    pub raw_prefix: String,
 }
 
 const RESERVED: &[(&str, &str, ChipKind)] = &[
@@ -42,14 +41,7 @@ pub fn parse(raw: &str, bangs: &[Bang]) -> Option<(ChipInfo, usize)> {
             return;
         }
         let off = bang_prefix_len + tlen + 1;
-        let cand = (
-            ChipInfo {
-                kind,
-                label,
-                raw_prefix: raw[..off].to_string(),
-            },
-            off,
-        );
+        let cand = (ChipInfo { kind, label }, off);
         if best.as_ref().map_or(true, |(_, o)| off > *o) {
             best = Some(cand);
         }
