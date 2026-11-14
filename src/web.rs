@@ -109,15 +109,25 @@ fn run(rx: std::sync::mpsc::Receiver<Cmd>) -> windows::core::Result<()> {
                         let c = c.ok_or(windows::core::Error::from(E_FAIL))?;
                         let mut r = RECT::default();
                         let _ = GetClientRect(hwnd, &mut r);
-                        let _ = c.Bounds(r);
-                        let _ = c.IsVisible(true);
+
+                        // webview2-com-sys 0.33 exposes the raw COM getters on the
+                        // interface struct (Bounds(&self, *mut RECT), IsVisible(&self,
+                        // *mut BOOL), etc.) and the setters on the `_Impl` trait
+                        // under the same name. UFCS on `_Impl` picks the setter.
+                        let _ = <_ as ICoreWebView2Controller_Impl>::Bounds(&c, r);
+                        let _ = <_ as ICoreWebView2Controller_Impl>::IsVisible(&c, true);
+
                         if let Ok(cw) = c.CoreWebView2() {
                             let s = cw.Settings()?;
-                            let _ = s.AreDevToolsEnabled(false);
-                            let _ = s.AreDefaultContextMenusEnabled(false);
-                            let _ = s.IsStatusBarEnabled(false);
-                            let _ = s.AreHostObjectsAllowed(false);
-                            let _ = s.IsWebMessageEnabled(false);
+                            // Same pattern for ICoreWebView2Settings.
+                            let _ = <_ as ICoreWebView2Settings_Impl>::AreDevToolsEnabled(&s, false);
+                            let _ = <_ as ICoreWebView2Settings_Impl>::AreDefaultContextMenusEnabled(&s, false);
+                            let _ = <_ as ICoreWebView2Settings_Impl>::IsStatusBarEnabled(&s, false);
+                            let _ = <_ as ICoreWebView2Settings_Impl>::AreHostObjectsAllowed(&s, false);
+                            let _ = <_ as ICoreWebView2Settings_Impl>::IsWebMessageEnabled(&s, false);
+                            // IsPasswordAutosaveEnabled / IsGeneralAutofillEnabled
+                            // live on ICoreWebView2Settings3/4. A fresh user-data
+                            // folder already defaults both to false.
                         }
                         *ctrl2b.lock().unwrap() = Some(c);
                         Ok(())
