@@ -85,8 +85,6 @@ pub struct Config {
     pub notes_dir: PathBuf,
     #[serde(default)]
     pub disabled_builtins: Vec<String>,
-    #[serde(skip)]
-    pub hotkey_fallback_note: Option<String>,
 }
 
 fn yes() -> bool { true }
@@ -148,7 +146,6 @@ impl Default for Config {
             blocklist: Vec::new(),
             notes_dir: appdata().join("notes"),
             disabled_builtins: Vec::new(),
-            hotkey_fallback_note: None,
         }
     }
 }
