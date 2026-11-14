@@ -56,16 +56,16 @@ pub fn resolve(q: &str) -> String {
 
 #[cfg(windows)]
 fn run(rx: std::sync::mpsc::Receiver<Cmd>) -> windows::core::Result<()> {
-    use windows::core::{w, HSTRING, PCWSTR};
-    use windows::Win32::Foundation::*;
-    use windows::Win32::System::LibraryLoader::GetModuleHandleW;
-    use windows::Win32::UI::WindowsAndMessaging::*;
+    use std::sync::{Arc, Mutex};
     use webview2_com::Microsoft::Web::WebView2::Win32::*;
     use webview2_com::{
         CreateCoreWebView2ControllerCompletedHandler,
         CreateCoreWebView2EnvironmentCompletedHandler,
     };
-    use std::sync::{Arc, Mutex};
+    use windows::core::{w, HSTRING, PCWSTR};
+    use windows::Win32::Foundation::*;
+    use windows::Win32::System::LibraryLoader::GetModuleHandleW;
+    use windows::Win32::UI::WindowsAndMessaging::*;
 
     unsafe {
         let hinst = GetModuleHandleW(None)?;
@@ -83,40 +83,41 @@ fn run(rx: std::sync::mpsc::Receiver<Cmd>) -> windows::core::Result<()> {
             class,
             w!("Palette Browser"),
             WS_OVERLAPPEDWINDOW & !(WS_CAPTION | WS_THICKFRAME) | WS_POPUP | WS_THICKFRAME,
-            200, 200, 1000, 720,
-            None, None, hinst, None,
+            200,
+            200,
+            1000,
+            720,
+            None,
+            None,
+            hinst,
+            None,
         )?;
         BROWSER_HWND.store(hwnd.0 as isize, Ordering::SeqCst);
 
-        let controller: Arc<Mutex<Option<ICoreWebView2Controller>>> = Arc::new(Mutex::new(None));
+        let controller: Arc<Mutex<Option<ICoreWebView2Controller>>> =
+            Arc::new(Mutex::new(None));
         let ctrl2 = controller.clone();
         let hwnd_usize = hwnd.0 as usize;
 
         let env_handler = CreateCoreWebView2EnvironmentCompletedHandler::create(Box::new(
             move |_hr, env| {
                 let env = env.ok_or(windows::core::Error::from(E_FAIL))?;
-                let hwnd = HWND(hwnd_usize as *mut _);
+                let hwnd = HWND(hwnd_usize as *mut std::ffi::c_void);
                 let ctrl2b = ctrl2.clone();
                 let ch = CreateCoreWebView2ControllerCompletedHandler::create(Box::new(
                     move |_hr, c| {
                         let c = c.ok_or(windows::core::Error::from(E_FAIL))?;
                         let mut r = RECT::default();
                         let _ = GetClientRect(hwnd, &mut r);
-                        // webview2-com 0.33 setters: SetBounds, SetIsVisible
-                        let _ = c.SetBounds(r);
-                        let _ = c.SetIsVisible(true);
-
+                        let _ = c.Bounds(r);
+                        let _ = c.IsVisible(true);
                         if let Ok(cw) = c.CoreWebView2() {
-                            // Base ICoreWebView2Settings setters (no put_ prefix).
                             let s = cw.Settings()?;
-                            let _ = s.SetAreDevToolsEnabled(false);
-                            let _ = s.SetAreDefaultContextMenusEnabled(false);
-                            let _ = s.SetIsStatusBarEnabled(false);
-                            let _ = s.SetAreHostObjectsAllowed(false);
-                            let _ = s.SetIsWebMessageEnabled(false);
-                            // ArePasswordAutosaveEnabled / IsGeneralAutofillEnabled
-                            // live on ICoreWebView2Settings3/4; skip on base interface
-                            // (the defaults are already false in a fresh profile).
+                            let _ = s.AreDevToolsEnabled(false);
+                            let _ = s.AreDefaultContextMenusEnabled(false);
+                            let _ = s.IsStatusBarEnabled(false);
+                            let _ = s.AreHostObjectsAllowed(false);
+                            let _ = s.IsWebMessageEnabled(false);
                         }
                         *ctrl2b.lock().unwrap() = Some(c);
                         Ok(())
@@ -129,7 +130,6 @@ fn run(rx: std::sync::mpsc::Receiver<Cmd>) -> windows::core::Result<()> {
 
         let user_data = crate::config::localappdata().join("WebView2");
         let ud = HSTRING::from(user_data.to_string_lossy().to_string());
-        // First argument is the browser-executable folder (PCWSTR). Pass null.
         let _ = CreateCoreWebView2EnvironmentWithOptions(
             PCWSTR::null(),
             &ud,
