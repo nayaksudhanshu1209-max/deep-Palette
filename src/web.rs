@@ -110,21 +110,18 @@ fn run(rx: std::sync::mpsc::Receiver<Cmd>) -> windows::core::Result<()> {
                         let mut r = RECT::default();
                         let _ = GetClientRect(hwnd, &mut r);
 
-                        // webview2-com-sys 0.33 exposes the raw COM getters on the
-                        // interface struct (Bounds(&self, *mut RECT), IsVisible(&self,
-                        // *mut BOOL), etc.) and the setters on the `_Impl` trait
-                        // under the same name. UFCS on `_Impl` picks the setter.
-                        let _ = <_ as ICoreWebView2Controller_Impl>::Bounds(&c, r);
-                        let _ = <_ as ICoreWebView2Controller_Impl>::IsVisible(&c, true);
+                        // Use the inherent SetBounds and SetIsVisible setters.
+                        let _ = c.SetBounds(r);
+                        let _ = c.SetIsVisible(true);
 
                         if let Ok(cw) = c.CoreWebView2() {
                             let s = cw.Settings()?;
-                            // Same pattern for ICoreWebView2Settings.
-                            let _ = <_ as ICoreWebView2Settings_Impl>::AreDevToolsEnabled(&s, false);
-                            let _ = <_ as ICoreWebView2Settings_Impl>::AreDefaultContextMenusEnabled(&s, false);
-                            let _ = <_ as ICoreWebView2Settings_Impl>::IsStatusBarEnabled(&s, false);
-                            let _ = <_ as ICoreWebView2Settings_Impl>::AreHostObjectsAllowed(&s, false);
-                            let _ = <_ as ICoreWebView2Settings_Impl>::IsWebMessageEnabled(&s, false);
+                            // Use the inherent Set... setters for settings.
+                            let _ = s.SetAreDevToolsEnabled(false);
+                            let _ = s.SetAreDefaultContextMenusEnabled(false);
+                            let _ = s.SetIsStatusBarEnabled(false);
+                            let _ = s.SetAreHostObjectsAllowed(false);
+                            let _ = s.SetIsWebMessageEnabled(false);
                             // IsPasswordAutosaveEnabled / IsGeneralAutofillEnabled
                             // live on ICoreWebView2Settings3/4. A fresh user-data
                             // folder already defaults both to false.
