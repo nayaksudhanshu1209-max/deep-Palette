@@ -8,7 +8,6 @@ pub enum Category {
     QuickFolders,
     Files,
     WindowsSettings,
-    Web,
 }
 
 impl Category {
@@ -19,7 +18,6 @@ impl Category {
             Category::QuickFolders => "Quick folders",
             Category::Files => "Files",
             Category::WindowsSettings => "Windows settings",
-            Category::Web => "Web",
         }
     }
 }
@@ -27,10 +25,8 @@ impl Category {
 #[derive(Clone)]
 pub enum Action {
     Open(String),
-    Url(String),
     MsSettings(String),
     Run { exe: String, args: String, cwd: String },
-    Web(String),
     Internal(&'static str),
 }
 
@@ -141,13 +137,11 @@ pub fn build(cfg: &Config) -> Vec<Item> {
         });
     }
 
-    // Built-in command toggles.
     out.retain(|i| {
         !(i.cat == Category::Commands
             && cfg.disabled_builtins.iter().any(|d| d == &i.title))
     });
 
-    // Blocklist filter.
     out.retain(|i| {
         !cfg.blocklist.iter().any(|b| {
             i.title.eq_ignore_ascii_case(b)
